@@ -55,7 +55,7 @@ public final class PixelEditContext {
     self.options = options
   }
 
-  func action(_ action: Action) {
+  public func action(_ action: Action) {
     self.didReceiveAction(action)
   }
 }
