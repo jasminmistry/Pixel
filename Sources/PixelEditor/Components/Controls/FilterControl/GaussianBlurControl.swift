@@ -41,7 +41,7 @@ open class GaussianBlurControl : GaussianBlurControlBase {
 
   private let clearButton = UIButton.init(type: .system)
 
-  override func setup() {
+  open override func setup() {
     super.setup()
 
     backgroundColor = Style.default.control.backgroundColor
@@ -95,5 +95,11 @@ open class GaussianBlurControl : GaussianBlurControlBase {
       self?.context.action(.commit)
       self?.pop(animated: true)
     }
-}
+  }
+
+  @objc
+  private func didTapRemoveAllButton() {
+    
+    context.action(.removeAllMasking)
+  }
 }
