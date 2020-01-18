@@ -34,23 +34,56 @@ open class GaussianBlurControlBase : FilterControlBase {
 open class GaussianBlurControl : GaussianBlurControlBase {
   
   open override var title: String {
-    return L10n.editBlur
+    return "Transparent"
   }
-
+  private let contentView = UIView()
   private let navigationView = NavigationView()
 
-  public let slider = StepSlider(frame: .zero)
+  private let clearButton = UIButton.init(type: .system)
 
-  open override func setup() {
+  override func setup() {
     super.setup()
 
     backgroundColor = Style.default.control.backgroundColor
-
-    TempCode.layout(navigationView: navigationView, slider: slider, in: self)
-
-    slider.mode = .plus
-    slider.addTarget(self, action: #selector(valueChanged), for: .valueChanged)
-
+    
+    base: do {
+      
+      addSubview(contentView)
+      addSubview(navigationView)
+      
+      contentView.translatesAutoresizingMaskIntoConstraints = false
+      navigationView.translatesAutoresizingMaskIntoConstraints = false
+      
+      NSLayoutConstraint.activate([
+        
+        contentView.topAnchor.constraint(equalTo: contentView.superview!.topAnchor),
+        contentView.rightAnchor.constraint(equalTo: contentView.superview!.rightAnchor),
+        contentView.leftAnchor.constraint(equalTo: contentView.superview!.leftAnchor),
+        
+        navigationView.topAnchor.constraint(equalTo: contentView.bottomAnchor),
+        navigationView.rightAnchor.constraint(equalTo: navigationView.superview!.rightAnchor),
+        navigationView.leftAnchor.constraint(equalTo: navigationView.superview!.leftAnchor),
+        navigationView.bottomAnchor.constraint(equalTo: navigationView.superview!.bottomAnchor),
+        ])
+      
+    }
+    
+    clearButton: do {
+      
+      contentView.addSubview(clearButton)
+      clearButton.translatesAutoresizingMaskIntoConstraints = false
+      
+      NSLayoutConstraint.activate([
+        clearButton.centerXAnchor.constraint(equalTo: clearButton.superview!.centerXAnchor),
+        clearButton.topAnchor.constraint(equalTo: clearButton.superview!.topAnchor, constant: 16),
+        ])
+      
+      clearButton.addTarget(self, action: #selector(didTapRemoveAllButton), for: .touchUpInside)
+      clearButton.setTitle(L10n.clear, for: .normal)
+      clearButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 17)
+      
+    }
+    
     navigationView.didTapCancelButton = { [weak self] in
       
       self?.context.action(.revert)
@@ -62,28 +95,5 @@ open class GaussianBlurControl : GaussianBlurControlBase {
       self?.context.action(.commit)
       self?.pop(animated: true)
     }
-  }
-
-  open override func didReceiveCurrentEdit(_ edit: EditingStack.Edit) {
-
-    slider.set(value: edit.filters.gaussianBlur?.value ?? 0, in: FilterGaussianBlur.range)
-
-  }
-
-  @objc
-  private func valueChanged() {
-
-    let value = slider.transition(in: FilterGaussianBlur.range)
-    
-    guard value != 0 else {
-      context.action(.setFilter({ $0.gaussianBlur = nil }))
-      return
-    }
-    
-    var f = FilterGaussianBlur()
-    f.value = value
-    context.action(.setFilter({ $0.gaussianBlur = f }))
-  }
-
 }
-
+}
